@@ -1,7 +1,10 @@
 package com.geekbrains;
 
+import java.util.concurrent.CyclicBarrier;
+
 public class Car implements Runnable {
-    private static int CARS_COUNT;
+    protected static int CARS_COUNT;
+    private static final CyclicBarrier barrier = new CyclicBarrier(Main.CARS_COUNT);
 
     static {
         CARS_COUNT = 0;
@@ -32,11 +35,14 @@ public class Car implements Runnable {
             System.out.println(this.name + " готовится");
             Thread.sleep(500 + (int) (Math.random() * 800));
             System.out.println(this.name + " готов");
+            Main.countDownForAnnouncement.countDown();
+            barrier.await();
         } catch (Exception e) {
             e.printStackTrace();
         }
         for (int i = 0; i < race.getStages().size(); i++) {
             race.getStages().get(i).go(this);
         }
+        Main.countDownForFinish.countDown();
     }
 }
